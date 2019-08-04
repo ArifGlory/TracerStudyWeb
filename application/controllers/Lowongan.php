@@ -29,14 +29,36 @@ class Lowongan extends CI_Controller
     }
 
     function index(){
-       
-      
         $data['lowongan']     = $this->The_Model->getDataLowongan()->result();
      
         $this->load->view('parts/header');
         $this->load->view('parts/sidebar');
         $this->load->view('lowongan/data_lowongan',$data);
         $this->load->view('parts/footer');
+    }
+
+    function simpanLowongan(){
+        $data = $_POST;
+        $foto = $_FILES['foto'];
+        
+        $this->The_Model->saveLowongan($data,$foto);
+    }
+
+    function hapusLowongan(){
+        $id =  $this->input->post('id_lowongan');
+
+        $this->The_Model->deleteLowongan($id);
+    }
+
+    function ubahLowongan(){
+        $data = $_POST;
+        $foto = $_FILES['foto'];
+
+       if($foto['name'] == null || $foto['name'] == ""){
+           $foto = null;
+       }
+       
+       $this->The_Model->updateLowongan($data,$foto);
     }
 
 }

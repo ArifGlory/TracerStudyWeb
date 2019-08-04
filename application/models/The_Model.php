@@ -10,6 +10,12 @@ class The_Model extends CI_Model
 {
     var $tb_materi    = "tb_materi";
     var $tb_alumni    = "tb_alumni";
+    var $fotoPath;
+
+    function __construct(){
+        parent::__construct();
+        $this->fotoPath =  realpath(APPPATH.'../foto/lowongan');    
+    }
 
     function get_materi(){
         $data = $this->db->get($this->tb_materi);
@@ -94,6 +100,133 @@ class The_Model extends CI_Model
             $response['status']     = "success";
             $response['message']    = "Data berhasil disimpan";
             $response['redirect']   = "Alumni";
+            
+            $response = json_encode($response);
+            echo $response;
+        }else{
+            $response['status']     = "error";
+            $response['message']    = "Terjadi kesalahan, coba lagi nanti";
+
+            $response = json_encode($response);
+            echo $response;
+        }
+    }
+
+    function saveLowongan($data,$foto){
+
+      
+        $target_dir = "foto/lowongan/";
+        $imgType    = substr($foto['type'],strpos( $foto['type'],"/") + 1);
+        $nmfile     = "file_".time() . "." . $imgType;
+        $targetFile = $target_dir . $nmfile;
+        $uploaded   = move_uploaded_file($foto['tmp_name'],$targetFile); 
+
+        $data['foto']   = $nmfile;
+        $redirect       =  base_url()."Lowongan";
+
+
+        if($uploaded){
+            $query =  $this->db->insert('tb_lowongan',$data);
+
+            if($query){
+                $response['status']     = "success";
+                $response['message']    = "Data berhasil disimpan";
+                $response['redirect']   = $redirect;
+                
+                $response = json_encode($response);
+                echo $response;
+            }else{
+                $response['status']     = "error";
+                $response['message']    = "Gagal menyimpan, coba lagi nanti";
+    
+                $response = json_encode($response);
+                echo $response;
+            }
+        }else{
+            $response['status']     = "error";
+            $response['message']    = "Upload gagal, coba lagi nanti";
+
+            $response = json_encode($response);
+            echo $response;
+        }
+    }
+
+    function updateLowongan($data,$foto){
+        $redirect       =  base_url()."Lowongan";
+        if($foto == null){
+            //ubah datanya saja
+            if(isset($data['foto'])){
+                unset($data['foto']);
+            }
+            
+            $id_lowongan = $data['id_lowongan'];
+            $this->db->where('id_lowongan',$id_lowongan);
+            $query =  $this->db->update("tb_lowongan",$data);
+            if($query){
+                $response['status']     = "success";
+                $response['message']    = "Data berhasil diubah";
+                $response['redirect']   = $redirect;
+                
+                $response = json_encode($response);
+                echo $response;
+            }else{
+                $response['status']     = "error";
+                $response['message']    = "Gagal menyimpan, coba lagi nanti";
+    
+                $response = json_encode($response);
+                echo $response;
+            }
+
+        }else{
+            //upload foto baru
+            $target_dir = "foto/lowongan/";
+            $imgType    = substr($foto['type'],strpos( $foto['type'],"/") + 1);
+            $nmfile     = "file_".time() . "." . $imgType;
+            $targetFile = $target_dir . $nmfile;
+            $uploaded   = move_uploaded_file($foto['tmp_name'],$targetFile); 
+            $data['foto']   = $nmfile;
+            $id_lowongan = $data['id_lowongan'];
+
+            if($uploaded){
+                $this->db->where('id_lowongan',$id_lowongan);
+                $query =  $this->db->update("tb_lowongan",$data);
+    
+                if($query){
+                    $response['status']     = "success";
+                    $response['message']    = "Data berhasil diubah";
+                    $response['redirect']   = $redirect;
+                    
+                    $response = json_encode($response);
+                    echo $response;
+                }else{
+                    $response['status']     = "error";
+                    $response['message']    = "Gagal menyimpan, coba lagi nanti";
+        
+                    $response = json_encode($response);
+                    echo $response;
+                }
+            }else{
+                $response['status']     = "error";
+                $response['message']    = "Upload gagal, coba lagi nanti";
+    
+                $response = json_encode($response);
+                echo $response;
+            }
+           
+
+
+        }
+    }
+
+    function deleteLowongan($id){
+        $this->db->where('id_lowongan',$id);
+        $query = $this->db->delete('tb_lowongan');
+        $redirect =  base_url()."Lowongan";
+
+        if($query){
+            $response['status']     = "success";
+            $response['message']    = "Data berhasil dihapus";
+            $response['redirect']   = $redirect;
             
             $response = json_encode($response);
             echo $response;
